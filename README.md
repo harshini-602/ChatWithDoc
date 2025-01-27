@@ -48,7 +48,7 @@ Chat with Doc is a smart PDF assistant that extracts and answers user queries ba
    ```
 3. Run the application:
    ```bash
-   python app.py
+   python ChatWithDoc.py
    ```
 
 ---
