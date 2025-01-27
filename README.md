@@ -34,7 +34,7 @@ Chat with Doc is a smart PDF assistant that extracts and answers user queries ba
 ### Prerequisites
 - Python 3.8+
 - Tesseract OCR installed ([Installation Guide](https://github.com/tesseract-ocr/tesseract))
-- poppler installed ([Installation Guide](https://github.com/oschwartz10612/poppler-windows/releases/)
+- poppler installed ([Installation Guide](https://github.com/oschwartz10612/poppler-windows/releases/))
 
 ### Steps
 1. Clone the repository:
