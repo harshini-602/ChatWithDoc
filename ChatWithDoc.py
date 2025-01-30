@@ -13,27 +13,22 @@ from langchain_google_genai import GoogleGenerativeAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 
-pytesseract.pytesseract.tesseract_cmd = "Add path of the tesseract.exe file"
-poppler_path = "Add path of poppler.exe file"
+pytesseract.pytesseract.tesseract_cmd ="Add your path"
+poppler_path = "Add your path"
+
 
 def get_pdftext(uploaded_file):
-    """
-    Extract text from a single uploaded PDF file.
-    """
     extracted_text = ""
 
     try:
-        # Step 1: Save the uploaded file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(uploaded_file.read())
             temp_path = temp_file.name
 
-        # Step 2: Attempt direct text extraction
         reader = PdfReader(temp_path)
         for page in reader.pages:
             extracted_text += page.extract_text() or ""
 
-        # Step 3: If direct text extraction fails, use OCR for image-based text
         if not extracted_text.strip():
             print("No direct text found. Performing OCR...")
             extracted_text = perform_ocr(temp_path)
@@ -49,16 +44,11 @@ def get_pdftext(uploaded_file):
 def perform_ocr(pdf_path):
     ocr_text = ""
     try:
-        # Convert PDF to images
         images = convert_from_path(pdf_path, poppler_path=poppler_path)
-
-        # Perform OCR on each image and specify the language as 'eng' for English
         for img in images:
             ocr_text += pytesseract.image_to_string(img, lang='eng')
-        
     except Exception as e:
         print(f"Error during OCR: {e}")
-    
     return ocr_text
 
 
@@ -93,40 +83,70 @@ def rag_pipeline(vectorstore):
     return chain
 
 
+def document_details_tab(uploaded_files):
+    if uploaded_files:
+        st.markdown("### Document Details:")
+        for file in uploaded_files:
+            st.write(f"**File Name:** {file.name}")
+            st.write(f"**File Size:** {file.size / 1024:.2f} KB")
+        if "chunk_count" in st.session_state:
+            st.write(f"**Indexed Chunks:** {st.session_state['chunk_count']}")
+    else:
+        st.warning("No document uploaded.")
+
+def Query_History():
+        st.subheader("Query History")
+        if st.session_state.chat_history:
+            for entry in st.session_state.chat_history:
+                if hasattr(entry, "content"):
+                    st.write(f"**{'Q' if entry.__class__.__name__ == 'HumanMessage' else 'A'}:** {entry.content}")
+        else:
+            st.write("No queries yet.")
+
+def chat_tab():
+        st.subheader("Chat")
+        user_question = st.text_input("Ask a question about your documents:")
+        if user_question:
+            user_query(user_question)
+
 def main():
     load_dotenv()
-    os.environ["GOOGLE_API_KEY"] = "Add you API Key"
+    os.environ["GOOGLE_API_KEY"] = "Add your key"
     st.set_page_config(
         page_title="Chat with Doc",
         page_icon="📚",
         layout="wide"
     )
 
+    # Initialize session state variables
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
+    if "document_info_list" not in st.session_state:  
+        st.session_state.document_info_list = []
 
-    st.title("📚 CHAT WITH DOC")
+    st.title("📚 Chat with Your Documents")
     st.markdown("Upload your PDF documents and ask questions about their content!")
 
-    user_question = st.text_input("Ask a question about your documents:")
-    if user_question:
-        user_query(user_question)
+    # Tabs with icons for navigation
+    tab1, tab2, tab3 = st.tabs(["💬 Chat", "📄 Document Details", "🕰️ Query History"])
+
 
     with st.sidebar:
-        st.subheader("Upload your PDF documents")
+        st.subheader("Upload and Manage Documents")
         uploaded_files = st.file_uploader("Upload your PDFs", type=["pdf"], accept_multiple_files=True)
-        
+
         if st.button("Process") and uploaded_files:
             with st.spinner("Processing..."):
                 all_text = ""
+                document_info_list = []
                 # Process each file separately
                 for uploaded_file in uploaded_files:
                     # Save the uploaded file to a temporary file
                     text = get_pdftext(uploaded_file)
                     if text:
-                        all_text += text + "\n"
+                        all_text += text + "\n" # Store document info
                     else:
                         st.error(f"Failed to extract text from {uploaded_file.name}")
 
@@ -134,8 +154,18 @@ def main():
                     chunks = get_chunks(all_text)
                     vectorstore = get_embeddings(chunks)
                     st.session_state.conversation = rag_pipeline(vectorstore)
+                    st.session_state.document_info_list = document_info_list  # Update session state here
                     st.success("Documents processed successfully!")
                 else:
                     st.error("No data loaded")
+    with tab1:
+        chat_tab()
+    with tab2:
+        document_details_tab(uploaded_files)
 
-main()
+    with tab3:
+        Query_History()
+
+        
+if __name__ == "__main__":
+    main()
