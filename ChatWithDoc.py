@@ -16,8 +16,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from docx import Document
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
-poppler_path = r"C:\\Users\\harsh\\poppler-24.02.0\\Library\\bin"
+pytesseract.pytesseract.tesseract_cmd = r"ADD PATH"
+poppler_path = r"ADD PATH"
 
 
 def process_documents(uploaded_file):
@@ -217,7 +217,7 @@ def add_csv_tab():
 
 def main():
     load_dotenv()
-    os.environ["GOOGLE_API_KEY"] = "AIzaSyAOY2xbnBU1pjZSoXv77ODvJdtPLdzIZAg"
+    os.environ["GOOGLE_API_KEY"] = "ADD YOUR API KEY HERE"
     st.set_page_config(
         page_title="Chat with Doc",
         page_icon="📚",
