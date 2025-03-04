@@ -9,7 +9,7 @@ Chat with Doc is a smart PDF assistant that extracts and answers user queries ba
 - **OCR Integration**: Reads text from images embedded in PDFs.
 - **Query Response**: Provides precise answers to user queries based on the document content.
 - **User-Friendly**: Simple and intuitive interface for seamless interaction.
-
+- **Document Types Supported**: Can process .pdf, .doc, .docx, .csv files
 ---
 
 ## How It Works
